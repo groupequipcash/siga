@@ -1,1 +1,334 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Acesso Exclusivo</title>
 
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body{
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:
+        radial-gradient(circle at top, rgba(139,92,246,0.15), transparent 40%),
+        linear-gradient(135deg,#070b1a,#0f172a,#111827);
+      overflow:hidden;
+      padding:20px;
+    }
+
+    .bg-particles{
+      position:fixed;
+      inset:0;
+      overflow:hidden;
+      pointer-events:none;
+    }
+
+    .particle{
+      position:absolute;
+      width:6px;
+      height:6px;
+      border-radius:50%;
+      background:rgba(255,255,255,0.15);
+      animation: float 8s linear infinite;
+    }
+
+    @keyframes float{
+      from{
+        transform:translateY(100vh);
+        opacity:0;
+      }
+      20%{
+        opacity:1;
+      }
+      to{
+        transform:translateY(-20vh);
+        opacity:0;
+      }
+    }
+
+    .container{
+      width:100%;
+      max-width:380px;
+      text-align:center;
+      z-index:2;
+    }
+
+    .card{
+      background: rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.08);
+      backdrop-filter: blur(18px);
+      border-radius:28px;
+      padding:40px 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+    }
+
+    .gift-box{
+      position:relative;
+      width:180px;
+      height:180px;
+      margin:0 auto 28px;
+      cursor:pointer;
+      transition:transform .25s ease;
+      animation: wiggle 2.2s ease-in-out infinite;
+    }
+
+    .gift-box:hover{
+      transform:scale(1.04);
+    }
+
+    @keyframes wiggle{
+      0%,100%{ transform:rotate(0deg); }
+      15%{ transform:rotate(-2deg); }
+      30%{ transform:rotate(2deg); }
+      45%{ transform:rotate(-1deg); }
+      60%{ transform:rotate(1deg); }
+    }
+
+    .gift-body{
+      position:absolute;
+      bottom:0;
+      width:180px;
+      height:130px;
+      border-radius:20px;
+      background:linear-gradient(135deg,#ec4899,#e11d48);
+      box-shadow:
+        0 10px 35px rgba(236,72,153,.35),
+        inset 0 2px 8px rgba(255,255,255,.18);
+    }
+
+    .gift-ribbon-v{
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      width:24px;
+      height:100%;
+      background:linear-gradient(180deg,#fde047,#f59e0b);
+      z-index:2;
+    }
+
+    .gift-ribbon-h{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      width:100%;
+      height:24px;
+      background:linear-gradient(90deg,#fde047,#f59e0b);
+      z-index:2;
+    }
+
+    .gift-lid{
+      position:absolute;
+      top:0;
+      left:-10px;
+      width:200px;
+      height:60px;
+      border-radius:16px;
+      background:linear-gradient(135deg,#fb7185,#ec4899);
+      box-shadow:0 8px 24px rgba(236,72,153,.35);
+      transition:all .75s cubic-bezier(.68,-0.55,.265,1.55);
+      z-index:3;
+    }
+
+    .gift-lid-ribbon{
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      width:24px;
+      height:100%;
+      background:linear-gradient(180deg,#fde047,#f59e0b);
+    }
+
+    .gift-bow{
+      position:absolute;
+      top:-22px;
+      left:50%;
+      transform:translateX(-50%);
+      font-size:38px;
+      z-index:4;
+      transition:all .75s cubic-bezier(.68,-0.55,.265,1.55);
+    }
+
+    .opened{
+      animation:none;
+    }
+
+    .opened .gift-lid{
+      transform:translateY(-90px) rotate(-30deg);
+      opacity:0;
+    }
+
+    .opened .gift-bow{
+      transform:translateX(-50%) translateY(-90px) scale(0);
+      opacity:0;
+    }
+
+    .glow{
+      position:absolute;
+      inset:0;
+      border-radius:50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.55), transparent 60%);
+      opacity:0;
+      transform:scale(.5);
+      z-index:1;
+    }
+
+    .glow.active{
+      animation: flash .7s ease forwards;
+    }
+
+    @keyframes flash{
+      0%{
+        opacity:0;
+        transform:scale(.5);
+      }
+      40%{
+        opacity:1;
+      }
+      100%{
+        opacity:0;
+        transform:scale(2.2);
+      }
+    }
+
+    .hint{
+      color:#fff;
+      font-size:22px;
+      font-weight:800;
+      margin-bottom:10px;
+    }
+
+    .sub{
+      color:rgba(255,255,255,.75);
+      font-size:15px;
+      line-height:1.5;
+    }
+
+    .confetti{
+      position:fixed;
+      top:-20px;
+      pointer-events:none;
+      z-index:999;
+      animation: fall linear forwards;
+    }
+
+    @keyframes fall{
+      to{
+        transform:translateY(110vh) rotate(720deg);
+        opacity:0;
+      }
+    }
+
+    .fallback{
+      margin-top:20px;
+      display:none;
+    }
+
+    .fallback a{
+      display:inline-block;
+      padding:14px 22px;
+      border-radius:14px;
+      background:#229ED9;
+      color:#fff;
+      text-decoration:none;
+      font-weight:700;
+      box-shadow:0 10px 24px rgba(34,158,217,.3);
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-particles" id="particles"></div>
+
+<div class="container">
+  <div class="card">
+    <div class="glow" id="glow"></div>
+
+    <div class="gift-box" id="giftBox" onclick="openGift()">
+      <div class="gift-bow">🎀</div>
+      <div class="gift-lid">
+        <div class="gift-lid-ribbon"></div>
+      </div>
+      <div class="gift-body">
+        <div class="gift-ribbon-v"></div>
+        <div class="gift-ribbon-h"></div>
+      </div>
+    </div>
+
+    <div class="hint">Toque para abrir</div>
+    <div class="sub">Você recebeu um acesso exclusivo</div>
+
+    <div class="fallback" id="fallback">
+      <a href="https://tikbot.shop/r/press">
+        Abrir manualmente
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  const REDIRECT_URL = "https://tikbot.shop/r/press";
+  let opened = false;
+
+  function createParticles(){
+    const container = document.getElementById('particles');
+    for(let i=0;i<20;i++){
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.left = Math.random()*100 + 'vw';
+      p.style.animationDuration = (Math.random()*5+4)+'s';
+      p.style.animationDelay = (Math.random()*5)+'s';
+      container.appendChild(p);
+    }
+  }
+
+  function confettiBurst(){
+    const emojis = ['🎉','✨','🎊','⭐','💫'];
+    for(let i=0;i<24;i++){
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+      c.style.left = Math.random()*100 + 'vw';
+      c.style.fontSize = (Math.random()*18 + 14) + 'px';
+      c.style.animationDuration = (Math.random()*1.6 + 1.2) + 's';
+      document.body.appendChild(c);
+
+      setTimeout(() => c.remove(), 3000);
+    }
+  }
+
+  function openGift(){
+    if(opened) return;
+    opened = true;
+
+    const gift = document.getElementById('giftBox');
+    const glow = document.getElementById('glow');
+
+    gift.classList.add('opened');
+    glow.classList.add('active');
+
+    confettiBurst();
+
+    setTimeout(() => {
+      window.location.href = REDIRECT_URL;
+    }, 950);
+
+    setTimeout(() => {
+      document.getElementById('fallback').style.display = 'block';
+    }, 2500);
+  }
+
+  createParticles();
+</script>
+
+</body>
+</html>
